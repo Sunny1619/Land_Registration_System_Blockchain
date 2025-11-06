@@ -1,0 +1,167 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { toast } from 'react-toastify';
+
+const RegisterLand = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    survey_number: '',
+    owner: '',
+    location: '',
+    area: '',
+    property_type: '',
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const result = await api.registerLand(formData);
+      
+      toast.success(`Land registered! Transaction ID: ${result.tx_id}`);
+
+      // Reset form
+      setFormData({
+        survey_number: '',
+        owner: '',
+        location: '',
+        area: '',
+        property_type: '',
+      });
+
+      // Navigate to status page after 2 seconds
+      setTimeout(() => {
+        navigate('/status');
+      }, 2000);
+    } catch (error) {
+      console.error('Error registering land:', error);
+      const errorMsg = error.response?.data?.error || 'Failed to register land';
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h1 className="page-title">📝 Register New Land</h1>
+
+      <div className="card">
+        <h2>Land Registration Form</h2>
+        <p style={{ color: '#666', marginBottom: '20px' }}>
+          Please provide accurate information. All fields are required.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="survey_number">Survey Number / Plot Number *</label>
+            <input
+              type="text"
+              id="survey_number"
+              name="survey_number"
+              value={formData.survey_number}
+              onChange={handleChange}
+              placeholder="e.g., SY-2024-MH-001 or PLOT-123-A"
+              required
+            />
+            <small>Government-issued unique identifier for this land parcel</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="owner">Owner Name *</label>
+            <input
+              type="text"
+              id="owner"
+              name="owner"
+              value={formData.owner}
+              onChange={handleChange}
+              placeholder="e.g., John Doe"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="location">Location *</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="e.g., Plot 12, Sector 9, Noida"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="area">Area *</label>
+            <input
+              type="text"
+              id="area"
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+              placeholder="e.g., 1500 sq.ft or 2000 sq.m"
+              required
+            />
+            <small>Include unit (sq.ft, sq.m, acres, etc.)</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="property_type">Property Type *</label>
+            <select
+              id="property_type"
+              name="property_type"
+              value={formData.property_type}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select Property Type --</option>
+              <option value="Residential">Residential</option>
+              <option value="Commercial">Commercial</option>
+              <option value="Agricultural">Agricultural</option>
+              <option value="Industrial">Industrial</option>
+            </select>
+          </div>
+
+          <div className="action-buttons">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Submitting...' : '✅ Submit Registration'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate('/')}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="card">
+        <h3>ℹ️ Important Information</h3>
+        <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+          <li><strong>Survey Number is mandatory</strong> - prevents duplicate land registration</li>
+          <li>Each Survey Number can only be registered once in the system</li>
+          <li>Land ID will be automatically generated by the system</li>
+          <li>SRO verification is required before blockchain inclusion</li>
+          <li>You can track your transaction in the "Transaction Status" page</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterLand;
