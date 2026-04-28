@@ -28,9 +28,6 @@ Built with Python, Flask, React.js, and SQLite - **No external blockchain librar
 
 ![System Demo](screenshots/Register_Land.png)
 
-**Access the Portals:**
-- **Central Portal** (Citizens): http://localhost:3000
-- **SRO Portal** (Officers): http://localhost:3001
 
 ---
 
